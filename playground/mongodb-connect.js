@@ -16,16 +16,16 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp',(err,client)=>{
     //     console.log(JSON.stringify(result.ops,undefined,2));
     // });
 
-    // db.collection('Users').insertOne({
-    //     name:'Leroy',
-    //     age:'26',
-    //     location:'Budapest',
-    // },(err,result)=>{
-    //     if(err){
-    //         return console.log('Unable to register user to database', err);
-    //     }
-    //     console.log(result.ops[0]._id.getTimestamp());
-    // });
+    db.collection('Users').insertOne({
+        name:'Singh',
+        age:'78',
+        location:'Ludhiana',
+    },(err,result)=>{
+        if(err){
+            return console.log('Unable to register user to database', err);
+        }
+        console.log(result.ops[0]._id.getTimestamp());
+    });
 
     client.close();
 });
