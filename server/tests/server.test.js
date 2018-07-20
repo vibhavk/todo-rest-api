@@ -1,11 +1,17 @@
 const expect = require('expect');
 const request = require('supertest');
-
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
-const dummyTodos = [{text: "dummy one"},{text: "dummy two"}];
+const dummyTodos = [{
+    text: "dummy one", 
+    _id:new ObjectID()
+},{
+    text: "dummy two",
+    _id:new ObjectID()
+}];
 
 beforeEach((done)=>{
     Todo.remove({}).then(()=>{
@@ -66,5 +72,32 @@ describe('GET /todos',()=>{
                 expect(res.body.todos.length).toBe(2);
             })
             .end(done);
+    });
+});
+
+describe('GET /todos/id',()=>{
+    it('Should return todo with requested ID',(done)=>{
+        request(app)
+            .get(`/todos/${dummyTodos[0]._id.toHexString()}`)//HexString converts object item to string
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.todo.text).toBe(dummyTodos[0].text);
+            })
+            .end(done);
+    });
+
+    it('Should return 404 on todo not found',(done)=>{
+        var dummyID = new ObjectID().toHexString();
+        request(app)
+            .get(`/todos/${dummyID}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('Should return 404 on non-object IDs',(done)=>{
+        request(app)
+            .get('/todos/qwerty12345')
+            .expect(404)
+            .end(done)
     });
 });
