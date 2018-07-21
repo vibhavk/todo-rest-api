@@ -11,7 +11,9 @@ const dummyTodos = [{
     _id:new ObjectID()
 },{
     text: "dummy two",
-    _id:new ObjectID()
+    _id:new ObjectID(),
+    completed: true,
+    completedAt: 666
 }];
 
 beforeEach((done)=>{
@@ -127,6 +129,42 @@ describe('DELETE/todos/id tests',()=>{
         request(app)
             .delete('/todos/qwerty12345')
             .expect(404)
+            .end(done);
+    });
+});
+
+
+describe('PATCH/todos/id tests',()=>{
+    it('Should update todo with passed id',(done)=>{
+        var updatingBody = {
+            text:"Updated",
+            completed:true
+        }
+        request(app)
+            .patch(`/todos/${dummyTodos[0]._id.toHexString()}`)
+            .send(updatingBody)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.todo.text).toBe(updatingBody.text);
+                expect(res.body.todo.completedAt).toBeA('number');
+            })
+            .end(done);
+            
+    });
+
+    it('Should clear completedAt when completed is set to false',(done)=>{
+        var updatingBody = {
+            text:"Updated",
+            completed:false
+        }
+        request(app)
+            .patch(`/todos/${dummyTodos[1]._id.toHexString()}`)
+            .send(updatingBody)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.todo.text).toBe(updatingBody.text);
+                expect(res.body.todo.completedAt).toNotBe('number');
+            })
             .end(done);
     });
 });
