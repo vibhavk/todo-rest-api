@@ -101,3 +101,31 @@ describe('GET /todos/id',()=>{
             .end(done)
     });
 });
+
+describe('DELETE/todos/id tests',()=>{
+    it('Should delete todo with passed id',(done)=>{
+        request(app)
+            .delete(`/todos/${dummyTodos[1]._id.toHexString()}`)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.todo.text).toBe(dummyTodos[1].text);
+            })
+            .end(done);
+            
+    });
+
+    it('Should return 404 on todo not found',(done)=>{
+        var dummyID = new ObjectID().toHexString();
+        request(app)
+            .delete(`/todos/${dummyID}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('Should return 404 on non-object IDs',(done)=>{
+        request(app)
+            .delete('/todos/qwerty12345')
+            .expect(404)
+            .end(done);
+    });
+});
