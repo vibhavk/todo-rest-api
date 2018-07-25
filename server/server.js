@@ -1,9 +1,9 @@
 var env = process.env.NODE_ENV || 'development';
 if(env === 'development'){
-    process.env.PORT = 3000;
+    process.env.PORT = 3001;
     process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoApp';
 }else if(env === 'test'){
-    process.env.PORT = 3000;
+    process.env.PORT = 3001;
     process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoAppTest';
 }
 
@@ -127,6 +127,14 @@ app.post('/users/login',(req,res)=>{
         });
     });
 });
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+    req.user.removeToken(req.token).then(() => {
+      res.status(200).send();
+    }, () => {
+      res.status(400).send();
+    });
+  });
 
 app.listen(port,()=>{
     console.log(`Starting on port :${port}`);
