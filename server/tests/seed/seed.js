@@ -18,15 +18,22 @@ const dummyUsers = [{
 },{
     _id: userTwoID,
     email:'xyz@xyz.com',
-    password: 'mehramiy'
+    password: 'mehramiy',
+
+    tokens:[{
+        access:'auth',
+        token: jwt.sign({_id:userTwoID,access:'auth'},'abc123').toString()
+    }]
 }];
 
 const dummyTodos = [{
     text: "dummy one", 
-    _id:new ObjectID()
+    _id:new ObjectID(),
+    _creator:userOneID
 },{
     text: "dummy two",
     _id:new ObjectID(),
+    _creator:userTwoID,
     completed: true,
     completedAt: 666
 }];
