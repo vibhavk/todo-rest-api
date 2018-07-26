@@ -1,3 +1,4 @@
 node_modules
 playground/hashing.js
 playground/mongoose-remove.js
+server/config/config.json
