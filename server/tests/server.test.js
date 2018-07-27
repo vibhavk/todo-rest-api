@@ -63,7 +63,7 @@ describe('GET /todos',()=>{
             .get('/todos')
             .set('x-auth',dummyUsers[0].tokens[0].token)
             .expect(200)
-            .expect((res)=>{
+            .expect((res)=>{ //interestingly this expect comes from supertest and only the below comes one from expect library itself.
                 expect(res.body.todos.length).toBe(1); // 1 since both dummy users have posted only 1 todo each
             })
             .end(done);
@@ -125,7 +125,7 @@ describe('DELETE /todos/:id', () => {
           }
   
           Todo.findById(hexId).then((todo) => {
-            expect(todo).toNotExist();
+            expect(todo).toBeFalsy();
             done();
           }).catch((e) => done(e));
         });
@@ -144,7 +144,7 @@ describe('DELETE /todos/:id', () => {
           }
   
           Todo.findById(hexId).then((todo) => {
-            expect(todo).toExist();
+            expect(todo).toBeTruthy();
             done();
           }).catch((e) => done(e));
         });
@@ -183,7 +183,9 @@ describe('PATCH/todos/id tests',()=>{
             .expect(200)
             .expect((res)=>{
                 expect(res.body.todo.text).toBe(updatingBody.text);
-                expect(res.body.todo.completedAt).toBeA('number');
+                expect(res.body.todo.completed).toBe(true);
+                //expect(res.body.todo.completedAt).toBeA('number'); upgraded from expect v1.20 to v21.1.0
+                expect(typeof res.body.todo.completedAt).toBe('number');
             })
             .end(done);
             
@@ -214,7 +216,8 @@ describe('PATCH/todos/id tests',()=>{
             .expect(200)
             .expect((res)=>{
                 expect(res.body.todo.text).toBe(updatingBody.text);
-                expect(res.body.todo.completedAt).toNotBe('number');
+                // expect(res.body.todo.completedAt).toNotBe('number'); upgrading to v21.1.0 of expect
+                expect(res.body.todo.completedAt).not.toBe('number');
             })
             .end(done);
     });
@@ -258,8 +261,8 @@ describe('POST /users',()=>{
             })
             .expect(200)
             .expect((res)=>{
-                expect(res.headers['x-auth']).toExist(); //be careful how we access x-auth in the header
-                expect(res.body._id).toExist();
+                expect(res.headers['x-auth']).toBeTruthy(); //be careful how we access x-auth in the header
+                expect(res.body._id).toBeTruthy();
                 expect(res.body.email).toBe(email);
             })
             .end((err)=>{
@@ -267,8 +270,8 @@ describe('POST /users',()=>{
                     return done(err);
                 }
                 User.findOne({email}).then((user)=>{
-                    expect(user).toExist();
-                    expect(user.password).toNotBe(password);
+                    expect(user).toBeTruthy();
+                    expect(user.password).not.toBe(password); //expect v21.1.0 compatibility upgrade
                     done()
                     })
                     .catch((e)=>{
@@ -317,7 +320,7 @@ describe('POST /users/login', ()=>{
             })
             .expect(200)
             .expect((res)=>{
-                expect(res.headers['x-auth']).toExist();
+                expect(res.headers['x-auth']).toBeTruthy();
             })
             .end((err,res)=>{ //here we are passing a custom async function to end() instead of directly passing done()
                 if(err){
@@ -325,8 +328,11 @@ describe('POST /users/login', ()=>{
                 }
 
                 User.findById({_id: dummyUsers[1]._id}).then((user)=>{ //checking if 2nd dummy user got the auth token attached to it.
-                    expect(user.tokens[1]).toInclude({
-                        access: 'auth',
+                    // expect(user.tokens[1]).toInclude({
+                    //     access: 'auth',
+                    //     token:res.headers['x-auth']
+                    expect(user.toObject().tokens[1]).toMatchObject({
+                        access: 'auth', //since to toMatchObject, unlike toInclude...cannot parse the mongo doc automatically to make an object so we manually made an object out of it in expect().
                         token:res.headers['x-auth']
                     });
                     done();
@@ -346,7 +352,7 @@ describe('POST /users/login', ()=>{
             })
             .expect(400)
             .expect((res)=>{
-                expect(res.headers['x-auth']).toNotExist();
+                expect(res.headers['x-auth']).toBeFalsy();
             })
             .end((err,res)=>{ //here we are passing a custom async function to end() instead of directly passing done()
                 if(err){
